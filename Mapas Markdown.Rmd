@@ -1,0 +1,69 @@
+---
+title: "Mapas"
+author: "R"
+date: "2/15/2022"
+output: rmdformats::material
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning=F, message=F}
+library(rio)
+library(tidyverse)
+library(dplyr)
+library(summarytools)
+library(lubridate)
+library(car)
+library(ggplot2)
+library(forcats)
+library(knitr)
+library(maptools)
+library(maditr)
+library(gtools)
+```
+
+```{r}
+setwd("C:/Users/azula/Desktop/Other/BI-Hans")
+```
+
+```{r, warning=F}
+dpto <- readShapeSpatial("DEPARTAMENTO_27_04_2015.shp")
+prov <- readShapeSpatial("PROVINCIA_27_04_2015.shp")
+dist <- readShapeSpatial("DISTRITO_27_04_2015.shp")
+fallecidos <- import("fallecidos_covid.csv")
+```
+
+# Adecuar información
+```{r}
+#Fecha fallecidos
+fallecidos$FECHA_FALLECIMIENTO=as.character(fallecidos$FECHA_FALLECIMIENTO)
+fallecidos$fecha=as.Date(fallecidos$FECHA_FALLECIMIENTO,"%Y%m%d")
+fallecidos$year_month<- as.factor(format(fallecidos$fecha,'%Y-%m'))
+fallecidos <- fallecidos [-c(1, 2, 5, 10)]
+
+#Base fallecidos por provincia
+fallecidos$n <- 1
+fallecidos$IDPROV <- substr(fallecidos$UBIGEO,1,nchar(fallecidos$UBIGEO)-2)
+fallecidos = fallecidos %>% group_by(IDPROV) %>% 
+  summarise(dpto_f=first(DEPARTAMENTO), prov_f=first(PROVINCIA), casos=sum(n))
+fallecidos = fallecidos[-1,]
+fallecidos$IDPROV <- as.factor(fallecidos$IDPROV)
+```
+
+# Mapa
+```{r}
+#Insumos para mapa
+leyenda=c("Muy bajo", "Bajo", "Medio", "Alto", "Muy alto")
+paleta=c("brown3", "chocolate1", "gold", "chartreuse3", "darkgreen")
+
+#Haciendo el mapa
+datageo=merge(prov,fallecidos,by.x="IDPROV",by.y="IDPROV",all.x=T)
+datageo@data$casos = cut(datageo@data$casos,breaks=c(0, 100, 500, 1000, 1500, 100000))
+titulo="Gráfico Fallecidos por provincia"
+colores=paleta[datageo@data$casos]
+plot(datageo,col=colores, main=titulo)
+legend(x="bottomleft", legend = rev(leyenda), col=rev(paleta), 
+       pch=18, title="Niveles",title.col="gray8",cex=0.8)
+```
