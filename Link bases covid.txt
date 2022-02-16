@@ -1,0 +1,5 @@
+Bases Contagios, fallecidos y vacunados.
+
+• Contagios: https://www.datosabiertos.gob.pe/dataset/casos-positivos-por-covid-19-ministerio-desalud-minsa
+• Fallecidos: https://www.datosabiertos.gob.pe/dataset/fallecidos-por-covid-19-ministerio-de-saludminsa
+• Vacunación : https://www.datosabiertos.gob.pe/dataset/vacunación-contra-covid-19-ministerio-desalud-minsa
